@@ -8,7 +8,10 @@ from utils import Visualizer
 import tqdm
 from torchnet import meter
 import ipdb
+import json
+import random
 
+result_data = {}
 
 class Config(object):
     data_path = 'data/'  # 诗歌的文本文件存放路径
@@ -191,7 +194,7 @@ def gen(**kwargs):
     """
     提供命令行接口，用以生成相应的诗
     """
-
+    print(kwargs)
     for k, v in kwargs.items():
         setattr(opt, k, v)
     data, word2ix, ix2word = get_data(opt)
@@ -203,26 +206,23 @@ def gen(**kwargs):
     if opt.use_gpu:
         model.cuda()
 
-    # python2和python3 字符串兼容
-    if sys.version_info.major == 3:
-        if opt.start_words.isprintable():
-            start_words = opt.start_words
-            prefix_words = opt.prefix_words if opt.prefix_words else None
-        else:
-            start_words = opt.start_words.encode('ascii', 'surrogateescape').decode('utf8')
-            prefix_words = opt.prefix_words.encode('ascii', 'surrogateescape').decode(
-                'utf8') if opt.prefix_words else None
-    else:
-        start_words = opt.start_words.decode('utf8')
-        prefix_words = opt.prefix_words.decode('utf8') if opt.prefix_words else None
-
-    start_words = start_words.replace(',', u'，') \
-        .replace('.', u'。') \
-        .replace('?', u'？')
+    # read names from file
+    with open(opt.start_words_file) as f:
+        json_data = json.load(f)
+        names = json_data["names"]
+        prefix_words_list = json_data["prefix_words_list"]
 
     gen_poetry = gen_acrostic if opt.acrostic else generate
-    result = gen_poetry(model, start_words, ix2word, word2ix, prefix_words)
-    print(''.join(result))
+    for name in names:
+        result = gen_poetry(model, name, ix2word, word2ix, prefix_words_list[random.randint(1,len(prefix_words_list) - 1)])
+        print(''.join(result))
+        result_data[name] = ''.join(result)
+    # 写入文件
+    # {key: value}
+    # for, 多个人名
+    # 读写相关配置文件，生成各人名对应的诗
+    with open('data.json', 'w', encoding='utf-8') as outfile:
+        json.dump(result_data, outfile, ensure_ascii=False)
 
 
 if __name__ == '__main__':

@@ -6,7 +6,7 @@ import re
 import numpy as np
 
 
-def _parseRawData(author=None, constrain=None, src='./chinese-poetry/json/simplified', category="poet.tang"):
+def _parseRawData(author=None, constrain=None, src='./chinese-poetry/json', category="poet.tang"):
     """
     code from https://github.com/justdark/pytorch-poetry-gen/blob/master/dataHandler.py
     处理json文件，返回诗歌内容
@@ -39,7 +39,7 @@ def _parseRawData(author=None, constrain=None, src='./chinese-poetry/json/simpli
         return r
 
     def handleJson(file):
-        # print file
+        print(file)
         rst = []
         data = json.loads(open(file).read())
         for poetry in data:
@@ -66,6 +66,7 @@ def _parseRawData(author=None, constrain=None, src='./chinese-poetry/json/simpli
         return rst
 
     data = []
+    print(src)
     for filename in os.listdir(src):
         if filename.startswith(category):
             data.extend(handleJson(src + filename))
