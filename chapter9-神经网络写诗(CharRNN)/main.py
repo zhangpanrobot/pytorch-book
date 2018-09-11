@@ -213,10 +213,10 @@ def gen(**kwargs):
         prefix_words_list = json_data["prefix_words_list"]
 
     gen_poetry = gen_acrostic if opt.acrostic else generate
-    for name in names:
-        result = gen_poetry(model, name, ix2word, word2ix, prefix_words_list[random.randint(1,len(prefix_words_list) - 1)])
+    for staff in names:
+        result = gen_poetry(model, staff['name'], ix2word, word2ix, prefix_words_list[random.randint(1,len(prefix_words_list) - 1)])
         print(''.join(result))
-        result_data[name] = ''.join(result)
+        result_data[staff['name']] = ''.join(result)
     # 写入文件
     # {key: value}
     # for, 多个人名
